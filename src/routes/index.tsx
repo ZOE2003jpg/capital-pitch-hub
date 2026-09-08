@@ -348,12 +348,13 @@ function DateField({ value, onChange, placeholder, max }: { value: Date | undefi
 
 function SectionTitle({ title, desc }: { title: string; desc?: string }) {
   return (
-    <div className="mb-5">
-      <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-      {desc && <p className="text-sm text-muted-foreground mt-0.5">{desc}</p>}
+    <div className="mb-6 border-l-4 border-primary/70 pl-3">
+      <h2 className="font-display text-lg font-bold tracking-tight text-foreground">{title}</h2>
+      {desc && <p className="mt-0.5 text-sm text-muted-foreground">{desc}</p>}
     </div>
   );
 }
+
 
 function PersonalStep({ data, update }: StepProps) {
   const onPassport = async (file: File | undefined) => {
@@ -674,13 +675,14 @@ function LoanStep({ data, update }: StepProps) {
         </Field>
       </div>
 
-      <footer className="mt-10 border-t pt-5 text-center text-sm text-gray-500">
+      <footer className="mt-10 border-t border-border/70 pt-5 text-center text-sm text-muted-foreground">
         Designed &amp; Developed by{" "}
         <a
           href="https://zoedeve.vercel.app"
           target="_blank"
           rel="noopener noreferrer"
-          className="font-medium text-blue-600 hover:underline"
+          className="font-semibold text-primary hover:underline"
+
         >
           Zoefx Technologies
         </a>

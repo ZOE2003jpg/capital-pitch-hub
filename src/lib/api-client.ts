@@ -74,10 +74,16 @@ export async function apiRequest<T>(
   }
 
   if (!response.ok) {
-    throw new Error(
-      (data as any)?.error || `Request failed: ${response.status}`
-    );
+    const raw = (data as any)?.error as string | undefined;
+    const friendly: Record<string, string> = {
+      ADMIN_NOT_FOUND: "No account found with that email address.",
+      INVALID_CREDENTIALS: "Incorrect email or password.",
+      INVALID_PASSWORD: "Incorrect email or password.",
+      UNAUTHORIZED: "Your session has expired. Please sign in again.",
+    };
+    throw new Error((raw && friendly[raw]) || raw || `Request failed: ${response.status}`);
   }
+
 
   return data;
 }

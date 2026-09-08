@@ -4,12 +4,16 @@ const getBaseURL = (): string => {
   if (typeof import.meta !== "undefined" && import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL;
   }
-  
-  // Default: call the Pitch Capital API directly (no dev proxy in this setup)
+
+  // Same-origin proxy to https://pitchcapital.ng/api — the live API returns a
+  // duplicated CORS header that browsers reject, so calls go through our server.
+  if (typeof window !== "undefined") return "/api/public/pc";
+
   return "https://pitchcapital.ng/api";
 };
 
 const API_BASE = getBaseURL();
+
 
 // Helper function to handle API requests
 export async function apiRequest<T>(

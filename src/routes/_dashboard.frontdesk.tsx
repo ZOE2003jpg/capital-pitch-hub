@@ -101,21 +101,29 @@ function FrontDeskPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Inbox className="h-4 w-4 text-primary" /> {tab === "pending" ? "Assigned Applications" : "Completed Applications"}
-          </CardTitle>
-          <CardDescription>
-            {apps.length} application{apps.length !== 1 ? "s" : ""}{" "}
-            {tab === "pending" ? "in queue" : "completed"}
-          </CardDescription>
+          <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Inbox className="h-4 w-4 text-primary" /> {tab === "pending" ? "Assigned Applications" : "Completed Applications"}
+              </CardTitle>
+              <CardDescription>
+                {apps.length} application{apps.length !== 1 ? "s" : ""}{" "}
+                {tab === "pending" ? "in queue" : "completed"}
+              </CardDescription>
+            </div>
+            <SearchInput value={query} onChange={setQuery} placeholder="Search by name" />
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           {apps.length === 0 ? (
             <div className="py-16 text-center text-sm text-muted-foreground">
-              {tab === "pending"
+              {query
+                ? `No applicant matches "${query}".`
+                : tab === "pending"
                 ? "No applications in the Front Desk queue."
                 : "No completed applications yet."}
             </div>
+
           ) : (
             <div className="overflow-x-auto">
               <Table>

@@ -201,16 +201,16 @@ function LoanApplication() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
-        <div className="max-w-lg w-full bg-card border rounded-xl p-8 text-center shadow-sm">
-          <div className="mx-auto w-14 h-14 rounded-full bg-accent flex items-center justify-center mb-4">
-            <Check className="w-7 h-7 text-accent-foreground" />
+      <div className="app-canvas flex min-h-screen items-center justify-center p-6">
+        <div className="w-full max-w-lg rounded-3xl border border-border/70 bg-card p-10 text-center shadow-lift">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl brand-gradient text-primary-foreground shadow-soft">
+            <Check className="h-8 w-8" />
           </div>
-          <h1 className="text-2xl font-semibold text-foreground">Application received</h1>
-          <p className="mt-2 text-muted-foreground">
+          <h1 className="font-display text-2xl font-bold text-foreground">Application received</h1>
+          <p className="mt-3 text-muted-foreground">
             Thank you, {data.firstName}. Our team will review your application and get back to you within 48 hours.
           </p>
-          <Button className="mt-6" onClick={() => { setSubmitted(false); setStep(0); setData(initial); }}>
+          <Button variant="brand" size="lg" className="mt-7" onClick={() => { setSubmitted(false); setStep(0); setData(initial); }}>
             Submit another application
           </Button>
         </div>
@@ -219,74 +219,87 @@ function LoanApplication() {
     );
   }
 
+  const progress = ((step + 1) / STEPS.length) * 100;
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground">
-        <div className="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
+    <div className="app-canvas min-h-screen">
+      <header className="sticky top-0 z-30 border-b border-primary-foreground/10 brand-gradient text-primary-foreground shadow-soft">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full overflow-hidden bg-accent flex items-center justify-center border border-accent-foreground/10 shrink-0">
-              <img src={logoUrl} alt="Pitch Capital Logo" className="w-full h-full object-cover" />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary-foreground/10 ring-1 ring-primary-foreground/25">
+              <img src={logoUrl} alt="Pitch Capital Logo" className="h-full w-full object-cover" />
             </div>
             <div>
-              <div className="font-semibold tracking-tight">Pitch Capital Limited</div>
+              <div className="font-display text-base font-bold tracking-tight">Pitch Capital Limited</div>
               <div className="text-xs opacity-80">Loans · Investments · Advisory</div>
             </div>
           </div>
-          <div className="hidden sm:block text-right text-xs opacity-80">
+          <div className="hidden text-right text-xs opacity-85 sm:block">
             <div>info@pitchcapital.ng</div>
             <div>0808 553 3191</div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-        <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">Loan Application</h1>
-          <p className="text-muted-foreground text-sm mt-1">Complete all four steps to submit your application.</p>
+      <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+        <div className="mb-8 max-w-2xl">
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+            <Building2 className="h-3.5 w-3.5" /> Salary-earner facility
+          </span>
+          <h1 className="mt-4 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Loan Application</h1>
+          <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+            Four short steps. Your details are encrypted and reviewed within 48 hours.
+          </p>
         </div>
 
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
+        <div className="mb-6 rounded-2xl border border-border/70 bg-card/70 p-4 shadow-soft backdrop-blur sm:p-5">
+          <div className="mb-3 grid grid-cols-4 gap-2">
             {STEPS.map((label, i) => (
-              <div key={label} className="flex-1 flex items-center gap-2 min-w-0">
+              <div key={label} className="flex min-w-0 items-center gap-2">
                 <div className={cn(
-                  "w-7 h-7 shrink-0 rounded-full flex items-center justify-center text-xs font-semibold border",
-                  i < step && "bg-accent border-accent text-accent-foreground",
-                  i === step && "bg-primary border-primary text-primary-foreground",
-                  i > step && "bg-background border-border text-muted-foreground",
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-bold transition-all",
+                  i < step && "border-transparent bg-accent text-accent-foreground",
+                  i === step && "border-transparent brand-gradient text-primary-foreground shadow-soft ring-4 ring-primary/15",
+                  i > step && "border-border bg-background text-muted-foreground",
                 )}>
-                  {i < step ? <Check className="w-4 h-4" /> : i + 1}
+                  {i < step ? <Check className="h-4 w-4" /> : i + 1}
                 </div>
-                <span className={cn("text-xs sm:text-sm truncate", i === step ? "text-foreground font-medium" : "text-muted-foreground")}>
+                <span className={cn(
+                  "hidden truncate text-xs sm:block sm:text-sm",
+                  i === step ? "font-semibold text-foreground" : "text-muted-foreground",
+                )}>
                   {label}
                 </span>
               </div>
             ))}
           </div>
-          <Progress value={((step + 1) / STEPS.length) * 100} className="h-1.5" />
+          <Progress value={progress} className="h-1.5" />
+          <div className="mt-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            Step {step + 1} of {STEPS.length}
+          </div>
         </div>
 
-        <div className="bg-card border rounded-xl shadow-sm p-5 sm:p-8">
+        <div className="rounded-3xl border border-border/70 bg-card p-5 shadow-lift sm:p-8">
           {step === 0 && <PersonalStep data={data} update={update} />}
           {step === 1 && <EmploymentStep data={data} update={update} />}
           {step === 2 && <BankNokStep data={data} update={update} />}
           {step === 3 && <LoanStep data={data} update={update} />}
 
-          <div className="mt-8 pt-6 border-t flex items-center justify-between gap-3">
+          <div className="mt-8 flex items-center justify-between gap-3 border-t border-border/70 pt-6">
             <Button variant="outline" onClick={prev} disabled={step === 0}>
-              <ChevronLeft className="w-4 h-4 mr-1" /> Back
+              <ChevronLeft className="mr-1 h-4 w-4" /> Back
             </Button>
             {step < STEPS.length - 1 ? (
-              <Button onClick={next}>Continue <ChevronRight className="w-4 h-4 ml-1" /></Button>
+              <Button variant="brand" onClick={next}>Continue <ChevronRight className="ml-1 h-4 w-4" /></Button>
             ) : (
-              <Button onClick={submit} className="bg-accent text-accent-foreground hover:bg-accent/90" disabled={isSubmitting}>
+              <Button variant="brand" size="lg" onClick={submit} disabled={isSubmitting}>
                 {isSubmitting ? "Submitting..." : "Submit application"}
               </Button>
             )}
           </div>
         </div>
 
-        <p className="mt-6 text-xs text-muted-foreground text-center">
+        <p className="mt-6 text-center text-xs text-muted-foreground">
           Information you provide is treated in strict confidence.
         </p>
       </main>
@@ -294,6 +307,7 @@ function LoanApplication() {
     </div>
   );
 }
+
 
 type StepProps = { data: FormData; update: <K extends keyof FormData>(k: K, v: FormData[K]) => void };
 

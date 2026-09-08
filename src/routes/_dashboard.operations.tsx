@@ -9,12 +9,18 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { SearchInput } from "@/components/admin/SearchInput";
 import { getAllApplications, formatNaira, type Application } from "@/lib/applications";
+import { matchesApplicant } from "@/lib/search";
 
 export const Route = createFileRoute("/_dashboard/operations")({
   head: () => ({ meta: [{ title: "Operations & Disbursement — Admin" }] }),
+  validateSearch: (search: Record<string, unknown>): { q?: string } => ({
+    q: typeof search.q === "string" ? search.q : undefined,
+  }),
   component: OperationsPage,
 });
+
 
 const ASSET_BASE = "https://pitchcapital.ng/api/";
 function resolveAssetUrl(path?: string | null): string {
@@ -24,9 +30,16 @@ function resolveAssetUrl(path?: string | null): string {
 }
 
 function OperationsPage() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const query = search.q ?? "";
+  const setQuery = (q: string) =>
+    navigate({ search: (prev) => (q ? { ...prev, q } : { ...prev, q: undefined }), replace: true });
+
   const [all, setAll] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"pending" | "history">("pending");
+
 
   useEffect(() => {
     async function fetchData() {
@@ -44,7 +57,8 @@ function OperationsPage() {
 
   const pending = all.filter((a) => a.status === "Awaiting Operations & Disbursement");
   const history = all.filter((a) => a.status === "Completed");
-  const apps = tab === "pending" ? pending : history;
+  const apps = (tab === "pending" ? pending : history).filter((a) => matchesApplicant(a, query));
+
 
   if (loading) {
     return (
@@ -84,22 +98,30 @@ function OperationsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Landmark className="h-4 w-4 text-primary" />
-            {tab === "pending" ? "Awaiting Disbursement" : "Completed Applications"}
-          </CardTitle>
-          <CardDescription>
-            {apps.length} application{apps.length !== 1 ? "s" : ""}{" "}
-            {tab === "pending" ? "in queue" : "completed"}
-          </CardDescription>
+          <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Landmark className="h-4 w-4 text-primary" />
+                {tab === "pending" ? "Awaiting Disbursement" : "Completed Applications"}
+              </CardTitle>
+              <CardDescription>
+                {apps.length} application{apps.length !== 1 ? "s" : ""}{" "}
+                {tab === "pending" ? "in queue" : "completed"}
+              </CardDescription>
+            </div>
+            <SearchInput value={query} onChange={setQuery} placeholder="Search by name" />
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           {apps.length === 0 ? (
             <div className="py-16 text-center text-sm text-muted-foreground">
-              {tab === "pending"
+              {query
+                ? `No applicant matches "${query}".`
+                : tab === "pending"
                 ? "No applications awaiting Operations & Disbursement."
                 : "No completed applications yet."}
             </div>
+
           ) : (
             <div className="overflow-x-auto">
               <Table>

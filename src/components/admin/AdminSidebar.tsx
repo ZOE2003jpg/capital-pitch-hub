@@ -125,31 +125,39 @@ export function AdminSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center gap-2 px-2 py-3">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full overflow-hidden bg-primary text-primary-foreground border border-sidebar-border/50">
-            <img src={logoUrl} alt="Pitch Capital Logo" className="w-full h-full object-cover" />
+        <div className="flex items-center gap-3 px-2 py-3">
+          <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl brand-gradient text-primary-foreground shadow-soft">
+            <img src={logoUrl} alt="Pitch Capital Logo" className="h-full w-full object-cover" />
           </div>
           {!collapsed && (
             <div className="min-w-0">
-              <div className="truncate text-sm font-bold">Pitch Capital</div>
-              <div className="truncate text-xs text-muted-foreground">Admin Console</div>
+              <div className="truncate font-display text-sm font-bold tracking-tight">Pitch Capital</div>
+              <div className="truncate text-[11px] uppercase tracking-wider text-muted-foreground">Admin Console</div>
             </div>
           )}
         </div>
       </SidebarHeader>
+
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Manage</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] font-semibold uppercase tracking-widest">Manage</SidebarGroupLabel>
+
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url, item.exact)} tooltip={item.title}>
-                    <Link to={item.url} className="flex items-center gap-2">
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.url, item.exact)}
+                    tooltip={item.title}
+                    className="rounded-lg font-medium transition-colors data-[active=true]:bg-primary/10 data-[active=true]:font-semibold data-[active=true]:text-primary"
+                  >
+                    <Link to={item.url} className="flex items-center gap-2.5">
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                     </Link>
                   </SidebarMenuButton>
+
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

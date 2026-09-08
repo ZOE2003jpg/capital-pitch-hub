@@ -1,16 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useMemo } from "react";
 import { format } from "date-fns";
-import { Search, Eye, Archive } from "lucide-react";
+import { Eye, Archive, FileSpreadsheet, Download } from "lucide-react";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { SearchInput } from "@/components/admin/SearchInput";
 import { getAllApplications, formatNaira, type AppStatus, type Application } from "@/lib/applications";
+import { matchesApplicant } from "@/lib/search";
+import { exportApprovedToExcel, filterApprovedByRange } from "@/lib/export-approved";
+
 
 const ASSET_BASE = "https://pitchcapital.ng/api/";
 function resolveAssetUrl(path?: string | null): string {
@@ -40,15 +46,43 @@ function finalizedDate(a: Application): string | number {
   return a.reviewedAt || a.reviewed_at || (a as any).completed_at || a.submittedAt || a.submitted_at || 0;
 }
 
+function iso(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+const PRESETS: { label: string; range: () => { from: string; to: string } }[] = [
+  { label: "Today", range: () => ({ from: iso(new Date()), to: iso(new Date()) }) },
+  {
+    label: "This week",
+    range: () => {
+      const now = new Date();
+      const start = new Date(now);
+      start.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+      return { from: iso(start), to: iso(now) };
+    },
+  },
+  {
+    label: "This month",
+    range: () => {
+      const now = new Date();
+      return { from: iso(new Date(now.getFullYear(), now.getMonth(), 1)), to: iso(now) };
+    },
+  },
+];
+
 function PositionManagementPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
 
   const [all, setAll] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const monthStart = PRESETS[2].range();
+  const [fromDate, setFromDate] = useState(monthStart.from);
+  const [toDate, setToDate] = useState(monthStart.to);
 
   const activeTab = (search.tab as AppStatus | undefined) ?? "Approved";
   const activeQuery = search.q ?? "";
+
 
   const setSearchParam = (patch: Partial<PositionSearch>) => {
     navigate({
@@ -90,16 +124,28 @@ function PositionManagementPage() {
   }, [finalized]);
 
   const filteredList = useMemo(() => {
-    const q = activeQuery.trim().toLowerCase();
     return finalized
       .filter((a) => a.status === activeTab)
-      .filter((a) =>
-        q
-          ? `${a.firstName || a.first_name} ${a.surname} ${a.id} ${a.email}`.toLowerCase().includes(q)
-          : true,
-      )
+      .filter((a) => matchesApplicant(a, activeQuery))
       .sort((a, b) => +new Date(finalizedDate(b)) - +new Date(finalizedDate(a)));
   }, [finalized, activeTab, activeQuery]);
+
+  // Approved applicants inside the chosen export date range.
+  const exportable = useMemo(
+    () => filterApprovedByRange(finalized, fromDate, toDate),
+    [finalized, fromDate, toDate],
+  );
+  const exportCount = exportable.length;
+
+  const handleExport = () => {
+    if (exportCount === 0) {
+      toast.error("No approved applicants in this date range.");
+      return;
+    }
+    const written = exportApprovedToExcel(exportable, fromDate, toDate);
+    toast.success(`Exported ${written} approved applicant${written === 1 ? "" : "s"}.`);
+  };
+
 
   if (loading) {
     return (
@@ -146,6 +192,54 @@ function PositionManagementPage() {
         </TabsList>
       </Tabs>
 
+      {activeTab === "Approved" && (
+        <Card className="border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileSpreadsheet className="h-4 w-4 text-primary" /> Export approved applicants
+            </CardTitle>
+            <CardDescription>
+              Name, loan amount, bank, account number and approved amount — as an Excel file.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="export-from" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">From</Label>
+                <Input id="export-from" type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="sm:w-44" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="export-to" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">To</Label>
+                <Input id="export-to" type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="sm:w-44" />
+              </div>
+              <Button variant="brand" onClick={handleExport} disabled={exportCount === 0}>
+                <Download className="mr-1 h-4 w-4" /> Export to Excel
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {exportCount === 0
+                ? "No approved applicants in this date range."
+                : `${exportCount} approved applicant${exportCount === 1 ? "" : "s"} will be exported.`}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {PRESETS.map((p) => (
+                <Button
+                  key={p.label}
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => { const r = p.range(); setFromDate(r.from); setToDate(r.to); }}
+                >
+                  {p.label}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+
+
       <Card>
         <CardHeader>
           <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
@@ -155,15 +249,12 @@ function PositionManagementPage() {
               </CardTitle>
               <CardDescription>{filteredList.length} result{filteredList.length === 1 ? "" : "s"}</CardDescription>
             </div>
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={activeQuery}
-                onChange={(e) => setSearchParam({ q: e.target.value })}
-                placeholder="Search by name, ID, email"
-                className="pl-9 sm:w-64"
-              />
-            </div>
+            <SearchInput
+              value={activeQuery}
+              onChange={(q) => setSearchParam({ q })}
+              placeholder="Search by name, ID, email"
+            />
+
           </div>
         </CardHeader>
         <CardContent className="p-0">

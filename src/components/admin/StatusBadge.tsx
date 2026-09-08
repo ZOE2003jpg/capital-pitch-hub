@@ -15,8 +15,17 @@ export function StatusBadge({ status, className }: { status: AppStatus; classNam
     Rejected: "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-900/30 dark:text-rose-200 dark:border-rose-800",
   };
   return (
-    <Badge variant="outline" className={cn("font-medium whitespace-nowrap", styles[status], className)}>
+    <Badge
+      variant="outline"
+      className={cn(
+        "gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap",
+        styles[status],
+        className,
+      )}
+    >
+      <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
       {status}
     </Badge>
   );
 }
+

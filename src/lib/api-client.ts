@@ -5,9 +5,8 @@ const getBaseURL = (): string => {
     return import.meta.env.VITE_API_BASE_URL;
   }
   
-  // Default to relative path for production (when deployed to /api/ on same domain)
-  // For local dev, vite proxy will handle it
-  return "/api";
+  // Default: call the Pitch Capital API directly (no dev proxy in this setup)
+  return "https://pitchcapital.ng/api";
 };
 
 const API_BASE = getBaseURL();

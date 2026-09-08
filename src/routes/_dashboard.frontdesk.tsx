@@ -9,13 +9,19 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { SearchInput } from "@/components/admin/SearchInput";
 import { getAllApplications, formatNaira, type Application } from "@/lib/applications";
+import { matchesApplicant } from "@/lib/search";
 import { getRole } from "@/lib/admin-auth";
 
 export const Route = createFileRoute("/_dashboard/frontdesk")({
   head: () => ({ meta: [{ title: "Front Desk Queue — Admin" }] }),
+  validateSearch: (search: Record<string, unknown>): { q?: string } => ({
+    q: typeof search.q === "string" ? search.q : undefined,
+  }),
   component: FrontDeskPage,
 });
+
 
 const ASSET_BASE = "https://pitchcapital.ng/api/";
 function resolveAssetUrl(path?: string | null): string {

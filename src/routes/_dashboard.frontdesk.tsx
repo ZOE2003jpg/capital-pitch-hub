@@ -62,7 +62,8 @@ function FrontDeskPage() {
     ? all.filter((a) => a.status === "Awaiting Front Desk")
     : all.filter((a) => a.status === "Awaiting Front Desk");
   const history = all.filter((a) => a.status === "Completed");
-  const apps = tab === "pending" ? pending : history;
+  const apps = (tab === "pending" ? pending : history).filter((a) => matchesApplicant(a, query));
+
 
   if (loading) {
     return (

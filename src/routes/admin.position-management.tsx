@@ -1,16 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useMemo } from "react";
 import { format } from "date-fns";
-import { Search, Eye, Archive } from "lucide-react";
+import { Eye, Archive, FileSpreadsheet, Download } from "lucide-react";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/admin/StatusBadge";
+import { SearchInput } from "@/components/admin/SearchInput";
 import { getAllApplications, formatNaira, type AppStatus, type Application } from "@/lib/applications";
+import { matchesApplicant } from "@/lib/search";
+import { exportApprovedToExcel, filterApprovedByRange } from "@/lib/export-approved";
+
 
 const ASSET_BASE = "https://pitchcapital.ng/api/";
 function resolveAssetUrl(path?: string | null): string {

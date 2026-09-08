@@ -131,11 +131,12 @@ export function DashboardLayout() {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-muted/30">
+      <div className="app-canvas flex min-h-screen w-full">
         <AdminSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur sm:px-6 print:hidden">
+          <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-border/60 bg-background/80 px-3 backdrop-blur-xl sm:px-6 print:hidden">
             <SidebarTrigger />
+
             <div className="ml-auto flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -189,7 +190,7 @@ export function DashboardLayout() {
                             key={n.id}
                             className={`flex items-stretch gap-1 border-l-2 px-1 py-1 transition-colors ${
                               unread
-                                ? "border-primary bg-slate-900 text-slate-50"
+                                ? "border-primary bg-primary/5"
                                 : "border-transparent bg-transparent"
                             }`}
                           >
@@ -197,10 +198,9 @@ export function DashboardLayout() {
                               {n.link_url ? (
                                 <a
                                   href={n.link_url}
-                                  className={`block rounded px-2 py-1 hover:bg-opacity-50 ${
-                                    unread ? "hover:bg-slate-800" : "hover:bg-muted"
-                                  }`}
+                                  className="block rounded px-2 py-1 hover:bg-muted"
                                 >
+
                                   {content}
                                 </a>
                               ) : (
@@ -238,9 +238,10 @@ export function DashboardLayout() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-2 px-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">{identity.initials}</AvatarFallback>
+                    <Avatar className="h-9 w-9 ring-2 ring-primary/15">
+                      <AvatarFallback className="brand-gradient text-primary-foreground text-xs font-bold">{identity.initials}</AvatarFallback>
                     </Avatar>
+
                     <div className="hidden text-left sm:block">
                       <div className="text-sm font-semibold leading-none">{displayName}</div>
                       <div className="text-xs text-muted-foreground">{displayRole}</div>
@@ -264,7 +265,7 @@ export function DashboardLayout() {
               </DropdownMenu>
             </div>
           </header>
-          <main className="min-w-0 flex-1 px-3 py-6 sm:px-6 lg:px-8 print:p-0">
+          <main className="mx-auto w-full min-w-0 max-w-[1400px] flex-1 px-3 py-6 sm:px-6 lg:px-8 print:p-0">
             <Outlet />
           </main>
         </div>

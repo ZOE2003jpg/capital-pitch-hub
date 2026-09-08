@@ -25,6 +25,7 @@ import { Route as LoginFrontdeskRouteImport } from './routes/login.frontdesk'
 import { Route as LoginMarketerRouteImport } from './routes/login.marketer'
 import { Route as LoginOperationsRouteImport } from './routes/login.operations'
 import { Route as AdminApplicationIdRouteImport } from './routes/admin.application.$id'
+import { Route as ApiPublicPcSplatRouteImport } from './routes/api/public/pc.$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -105,6 +106,11 @@ const AdminApplicationIdRoute = AdminApplicationIdRouteImport.update({
   path: '/application/$id',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicPcSplatRoute = ApiPublicPcSplatRouteImport.update({
+  id: '/api/public/pc/$',
+  path: '/api/public/pc/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/login/operations': typeof LoginOperationsRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/application/$id': typeof AdminApplicationIdRoute
+  '/api/public/pc/$': typeof ApiPublicPcSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/login/operations': typeof LoginOperationsRoute
   '/admin': typeof AdminIndexRoute
   '/admin/application/$id': typeof AdminApplicationIdRoute
+  '/api/public/pc/$': typeof ApiPublicPcSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/login/operations': typeof LoginOperationsRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/application/$id': typeof AdminApplicationIdRoute
+  '/api/public/pc/$': typeof ApiPublicPcSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/login/operations'
     | '/admin/'
     | '/admin/application/$id'
+    | '/api/public/pc/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/login/operations'
     | '/admin'
     | '/admin/application/$id'
+    | '/api/public/pc/$'
   id:
     | '__root__'
     | '/'
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/login/operations'
     | '/admin/'
     | '/admin/application/$id'
+    | '/api/public/pc/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -219,6 +231,7 @@ export interface RootRouteChildren {
   LoginFrontdeskRoute: typeof LoginFrontdeskRoute
   LoginMarketerRoute: typeof LoginMarketerRoute
   LoginOperationsRoute: typeof LoginOperationsRoute
+  ApiPublicPcSplatRoute: typeof ApiPublicPcSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -335,6 +348,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminApplicationIdRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/pc/$': {
+      id: '/api/public/pc/$'
+      path: '/api/public/pc/$'
+      fullPath: '/api/public/pc/$'
+      preLoaderRoute: typeof ApiPublicPcSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -383,6 +403,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginFrontdeskRoute: LoginFrontdeskRoute,
   LoginMarketerRoute: LoginMarketerRoute,
   LoginOperationsRoute: LoginOperationsRoute,
+  ApiPublicPcSplatRoute: ApiPublicPcSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

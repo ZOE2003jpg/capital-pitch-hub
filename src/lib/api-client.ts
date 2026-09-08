@@ -70,8 +70,12 @@ export async function apiRequest<T>(
   try {
     data = await response.json();
   } catch (e) {
+    if (response.status === 401 || response.status === 403) {
+      throw new Error("Sign-in isn't available in the preview. Please use the published site.");
+    }
     throw new Error(`Request failed: ${response.status} ${response.statusText}`);
   }
+
 
   if (!response.ok) {
     const raw = (data as any)?.error as string | undefined;

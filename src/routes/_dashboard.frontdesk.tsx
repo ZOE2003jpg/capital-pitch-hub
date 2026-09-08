@@ -31,10 +31,17 @@ function resolveAssetUrl(path?: string | null): string {
 }
 
 function FrontDeskPage() {
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const query = search.q ?? "";
+  const setQuery = (q: string) =>
+    navigate({ search: (prev) => (q ? { ...prev, q } : { ...prev, q: undefined }), replace: true });
+
   const [all, setAll] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"pending" | "history">("pending");
   const role = getRole();
+
 
   useEffect(() => {
     async function fetchData() {

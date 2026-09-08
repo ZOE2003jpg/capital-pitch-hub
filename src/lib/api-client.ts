@@ -50,11 +50,16 @@ export async function apiRequest<T>(
     options.body = JSON.stringify(options.body);
   }
 
-  const response = await fetch(url, {
-    ...options,
-    credentials: "include",
-    headers,
-  } as RequestInit);
+  // Note: no `credentials: "include"` — the API replies with a wildcard CORS
+  // origin, and browsers block credentialed requests against that. Auth rides
+  // on the Bearer token above.
+  let response: Response;
+  try {
+    response = await fetch(url, { ...options, headers } as RequestInit);
+  } catch {
+    throw new Error("Cannot reach the Pitch Capital server. Please check your connection and try again.");
+  }
+
 
   // Try to parse JSON even if response is error
   let data: T;

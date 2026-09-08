@@ -4,12 +4,16 @@ const getBaseURL = (): string => {
   if (typeof import.meta !== "undefined" && import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL;
   }
-  
-  // Default: call the Pitch Capital API directly (no dev proxy in this setup)
+
+  // Same-origin proxy to https://pitchcapital.ng/api — the live API returns a
+  // duplicated CORS header that browsers reject, so calls go through our server.
+  if (typeof window !== "undefined") return "/api/public/pc";
+
   return "https://pitchcapital.ng/api";
 };
 
 const API_BASE = getBaseURL();
+
 
 // Helper function to handle API requests
 export async function apiRequest<T>(
@@ -50,11 +54,16 @@ export async function apiRequest<T>(
     options.body = JSON.stringify(options.body);
   }
 
-  const response = await fetch(url, {
-    ...options,
-    credentials: "include",
-    headers,
-  } as RequestInit);
+  // Note: no `credentials: "include"` — the API replies with a wildcard CORS
+  // origin, and browsers block credentialed requests against that. Auth rides
+  // on the Bearer token above.
+  let response: Response;
+  try {
+    response = await fetch(url, { ...options, headers } as RequestInit);
+  } catch {
+    throw new Error("Cannot reach the Pitch Capital server. Please check your connection and try again.");
+  }
+
 
   // Try to parse JSON even if response is error
   let data: T;
@@ -65,10 +74,16 @@ export async function apiRequest<T>(
   }
 
   if (!response.ok) {
-    throw new Error(
-      (data as any)?.error || `Request failed: ${response.status}`
-    );
+    const raw = (data as any)?.error as string | undefined;
+    const friendly: Record<string, string> = {
+      ADMIN_NOT_FOUND: "No account found with that email address.",
+      INVALID_CREDENTIALS: "Incorrect email or password.",
+      INVALID_PASSWORD: "Incorrect email or password.",
+      UNAUTHORIZED: "Your session has expired. Please sign in again.",
+    };
+    throw new Error((raw && friendly[raw]) || raw || `Request failed: ${response.status}`);
   }
+
 
   return data;
 }

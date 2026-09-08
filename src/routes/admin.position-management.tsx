@@ -124,16 +124,28 @@ function PositionManagementPage() {
   }, [finalized]);
 
   const filteredList = useMemo(() => {
-    const q = activeQuery.trim().toLowerCase();
     return finalized
       .filter((a) => a.status === activeTab)
-      .filter((a) =>
-        q
-          ? `${a.firstName || a.first_name} ${a.surname} ${a.id} ${a.email}`.toLowerCase().includes(q)
-          : true,
-      )
+      .filter((a) => matchesApplicant(a, activeQuery))
       .sort((a, b) => +new Date(finalizedDate(b)) - +new Date(finalizedDate(a)));
   }, [finalized, activeTab, activeQuery]);
+
+  // Approved applicants inside the chosen export date range.
+  const exportable = useMemo(
+    () => filterApprovedByRange(finalized, fromDate, toDate),
+    [finalized, fromDate, toDate],
+  );
+  const exportCount = exportable.length;
+
+  const handleExport = () => {
+    if (exportCount === 0) {
+      toast.error("No approved applicants in this date range.");
+      return;
+    }
+    const written = exportApprovedToExcel(exportable, fromDate, toDate);
+    toast.success(`Exported ${written} approved applicant${written === 1 ? "" : "s"}.`);
+  };
+
 
   if (loading) {
     return (
